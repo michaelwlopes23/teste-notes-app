@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"notes-app/internal/model"
 	"notes-app/internal/view"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 var notes []model.Note
@@ -33,4 +36,24 @@ func GetAllNote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	view.JSONReponse(w, http.StatusOK, notes)
+}
+
+func DeleteNote(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		View.ErrorResponse(w, http.StatusBadRequest, "ID inválido!")
+		return
+	}
+
+	for index, note := range notes {
+		if note.ID == id {
+			notes = append(notes[:index], notes[index+1:]...)
+			view.JSONReponse(w, http.StatusOK, "Nota deletada com sucesso!")
+			return
+		}
+	}
+
+	view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
 }

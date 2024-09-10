@@ -14,6 +14,7 @@ func main() {
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	r.HandleFunc("/notes", controller.CreateNote).Methods("POST")
 	r.HandleFunc("/notes", controller.GetAllNote).Methods("GET")
+	r.HandleFunc("/notes/{id}", controller.DeleteNote).Methods("DELETE")
 
 	log.Println("Iniciando o servidor na porta 8000...")
 	http.Handle("/", r)
