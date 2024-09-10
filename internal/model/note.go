@@ -1,6 +1,6 @@
 package model
 
 type Note struct {
-	ID      int    `json:"id"`
-	Content string `json:"content"`
+	ID      uint   `gorm:"primaryKey"`
+	Content string `gorm:"type:text"`
 }
