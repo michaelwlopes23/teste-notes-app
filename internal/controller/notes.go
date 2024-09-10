@@ -39,7 +39,7 @@ func GetAllNote(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetNoteByID(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars()
+	vars := mux.Vars(r)
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -62,7 +62,7 @@ func DeleteNote(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		View.ErrorResponse(w, http.StatusBadRequest, "ID inválido!")
+		view.ErrorResponse(w, http.StatusBadRequest, "ID inválido!")
 		return
 	}
 
