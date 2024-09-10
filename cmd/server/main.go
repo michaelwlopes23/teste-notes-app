@@ -4,11 +4,14 @@ import (
 	"log"
 	"net/http"
 	"notes-app/internal/controller"
+	"notes-app/internal/database"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	database.InitDB()
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", homeHandler).Methods("GET")
