@@ -25,3 +25,12 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
 
 	view.JSONReponse(w, http.StatusCreated, newNote)
 }
+
+func GetAllNote(w http.ResponseWriter, r *http.Request) {
+	if len(notes) == 0 {
+		view.JSONReponse(w, http.StatusOK, "Nenhuma nota criada ainda!")
+		return
+	}
+
+	view.JSONReponse(w, http.StatusOK, notes)
+}
