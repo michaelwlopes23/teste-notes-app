@@ -77,3 +77,27 @@ func DeleteNote(w http.ResponseWriter, r *http.Request) {
 
 	view.JSONReponse(w, http.StatusOK, map[string]string{"message": "Nota deletada com sucesso!"})
 }
+
+func UpdateNote(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "ID inválido")
+		return
+	}
+
+	var UpdateNote model.Note
+
+	if err := json.NewDecoder(r.Body).Decode(&UpdateNote); err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "Erro ao processar o corpo da requisição!")
+	}
+
+	var existingNote model.Note
+
+	if err := database.DB.First(&existingNote, id).Error; err != nil {
+		view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
+	}
+
+	existingNote.Content = UpdateNote.Content
+
+}
