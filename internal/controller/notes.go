@@ -38,6 +38,25 @@ func GetAllNote(w http.ResponseWriter, r *http.Request) {
 	view.JSONReponse(w, http.StatusOK, notes)
 }
 
+func GetNoteByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars()
+
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "ID invalido!")
+		return
+	}
+
+	for _, note := range notes {
+		if note.ID == id {
+			view.JSONReponse(w, http.StatusOK, note)
+			return
+		}
+	}
+
+	view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
+}
+
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
