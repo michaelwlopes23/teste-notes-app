@@ -14,6 +14,8 @@ func main() {
 
 	r := mux.NewRouter()
 
+	r.HandleFunc("/users", controller.CreateUser).Methods("POST")
+
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	r.HandleFunc("/notes", controller.CreateNote).Methods("POST")
 	r.HandleFunc("/notes", controller.GetAllNote).Methods("GET")

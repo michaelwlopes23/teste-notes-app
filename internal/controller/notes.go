@@ -28,7 +28,7 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
 
 	note.UserID = uint(userID)
 
-	view.JSONReponse(w, http.StatusCreated, note)
+	view.JSONResponse(w, http.StatusCreated, note)
 }
 
 func GetAllNote(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +45,7 @@ func GetAllNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, notes)
+	view.JSONResponse(w, http.StatusOK, notes)
 }
 
 func GetNoteByID(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +65,7 @@ func GetNoteByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, note)
+	view.JSONResponse(w, http.StatusOK, note)
 }
 
 func UpdateNote(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,7 @@ func UpdateNote(w http.ResponseWriter, r *http.Request) {
 		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao atualizar os dados de nota!")
 	}
 
-	view.JSONReponse(w, http.StatusOK, existingNote)
+	view.JSONResponse(w, http.StatusOK, existingNote)
 }
 
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
@@ -119,5 +119,5 @@ func DeleteNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, map[string]string{"message": "Nota deletada com sucesso!"})
+	view.JSONResponse(w, http.StatusOK, map[string]string{"message": "Nota deletada com sucesso!"})
 }
