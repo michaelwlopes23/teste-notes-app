@@ -13,51 +13,95 @@ import (
 
 func CreateNote(w http.ResponseWriter, r *http.Request) {
 	var note model.Note
+	vars := mux.Vars(r)
 
-	err := json.NewDecoder(r.Body).Decode(&note)
+	userID, err := strconv.Atoi(vars["userID"])
 	if err != nil {
-		view.ErrorResponse(w, http.StatusBadRequest, "Dados inválidos!")
+		view.ErrorResponse(w, http.StatusBadRequest, "ID do usuário inválido!")
 		return
 	}
 
-	if err := database.DB.Create(&note).Error; err != nil {
-		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao saver a nota no banco de dados!")
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "Erro ao salvar nota no banco de dados!")
+		return
 	}
 
-	view.JSONReponse(w, http.StatusCreated, note)
+	note.UserID = uint(userID)
+
+	view.JSONResponse(w, http.StatusCreated, note)
 }
 
 func GetAllNote(w http.ResponseWriter, r *http.Request) {
 	var notes []model.Note
-
-	if err := database.DB.Find(&notes).Error; err != nil {
-		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao buscar as notas")
+	vars := mux.Vars(r)
+	userID, err := strconv.Atoi(vars["userID"])
+	if err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "ID do usuário inválido!")
+		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, notes)
+	if err := database.DB.Where("user_id = ?", userID).Find(&notes).Error; err != nil {
+		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao buscar as notas do usuário!")
+		return
+	}
+
+	view.JSONResponse(w, http.StatusOK, notes)
 }
 
 func GetNoteByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	noteID, err := strconv.Atoi(vars["id"])
+	userID, err := strconv.Atoi(vars["userID"])
 
-	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		view.ErrorResponse(w, http.StatusBadRequest, "ID invalido!")
 		return
 	}
 
 	var note model.Note
-	if err := database.DB.First(&note, id).Error; err != nil {
+
+	if err := database.DB.Where("node_id = ? user_id = ?", noteID, userID).First(&note).Error; err != nil {
 		view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
+		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, note)
+	view.JSONResponse(w, http.StatusOK, note)
+}
+
+func UpdateNote(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	noteID, err := strconv.Atoi(vars["id"])
+	userID, err := strconv.Atoi(vars["userID"])
+	if err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "ID inválido")
+		return
+	}
+
+	var UpdateNote model.Note
+	if err := json.NewDecoder(r.Body).Decode(&UpdateNote); err != nil {
+		view.ErrorResponse(w, http.StatusBadRequest, "Erro ao processar o corpo da requisição!")
+	}
+
+	var existingNote model.Note
+	if err := database.DB.Where("id = ? AND user_id = ?", noteID, userID).First(&existingNote).Error; err != nil {
+		view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
+		return
+	}
+
+	existingNote.Title = UpdateNote.Title
+	existingNote.Description = UpdateNote.Description
+
+	if err := database.DB.Save(&existingNote).Error; err != nil {
+		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao atualizar os dados de nota!")
+	}
+
+	view.JSONResponse(w, http.StatusOK, existingNote)
 }
 
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-
-	id, err := strconv.Atoi(vars["id"])
+	noteID, err := strconv.Atoi(vars["id"])
+	userID, err := strconv.Atoi(vars["userID"])
 	if err != nil {
 		view.ErrorResponse(w, http.StatusBadRequest, "ID inválido!")
 		return
@@ -65,39 +109,15 @@ func DeleteNote(w http.ResponseWriter, r *http.Request) {
 
 	var note model.Note
 
-	if err := database.DB.First(&note, id).Error; err != nil {
+	if err := database.DB.Where("id = ? AND user_id = ?", noteID, userID).First(&note).Error; err != nil {
 		view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
 		return
 	}
 
-	if err := database.DB.Delete(&note, id).Error; err != nil {
-		view.ErrorResponse(w, http.StatusNotFound, "Erro ao deletar a nota!")
+	if err := database.DB.Delete(&note).Error; err != nil {
+		view.ErrorResponse(w, http.StatusInternalServerError, "Erro ao deletar a nota!")
 		return
 	}
 
-	view.JSONReponse(w, http.StatusOK, map[string]string{"message": "Nota deletada com sucesso!"})
-}
-
-func UpdateNote(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		view.ErrorResponse(w, http.StatusBadRequest, "ID inválido")
-		return
-	}
-
-	var UpdateNote model.Note
-
-	if err := json.NewDecoder(r.Body).Decode(&UpdateNote); err != nil {
-		view.ErrorResponse(w, http.StatusBadRequest, "Erro ao processar o corpo da requisição!")
-	}
-
-	var existingNote model.Note
-
-	if err := database.DB.First(&existingNote, id).Error; err != nil {
-		view.ErrorResponse(w, http.StatusNotFound, "Nota não encontrada!")
-	}
-
-	existingNote.Content = UpdateNote.Content
-
+	view.JSONResponse(w, http.StatusOK, map[string]string{"message": "Nota deletada com sucesso!"})
 }

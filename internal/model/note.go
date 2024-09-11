@@ -1,6 +1,12 @@
 package model
 
+import "gorm.io/gorm"
+
 type Note struct {
-	ID      uint   `gorm:"primaryKey"`
-	Content string `gorm:"type:text"`
+	gorm.Model
+	ID          uint   `gorm:"primaryKey"`
+	Title       string `gorm:"not null"`
+	Description string `gorm:"type:text"`
+	UserID      uint
+	User        User `gorm:"foreignKey:UserID"`
 }
